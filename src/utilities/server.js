@@ -25,7 +25,7 @@ const createServer = () => {
 		return res.status(200).render("homepage");
 	});
 	
-	app.use((req, res) => res.status(404).render("404"));
+	app.use((req, res) => res.status(404).render("notFound"));
 
 	return app;
 };
