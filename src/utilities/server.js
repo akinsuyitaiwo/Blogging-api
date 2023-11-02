@@ -2,30 +2,35 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
 const router = require("../routes/index.js");
+const { fetchBlogs } = require("../controllers/blog.js");
 const requestLogger = require("../middleware/reqLogger.js");
 
 const createServer = () => {
 	const app = express();
 	app.use(express.json());
-	app.set("views", path.join(__dirname, "../view"));
+	app.set("views", path.join(__dirname, "../views"));
 	app.set("view engine", "ejs");
 
 	app.use(cors());
-	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({ extended: true }));
 	app.use(bodyParser.json());
 	app.use(requestLogger);
 
 	app.use("/", router);
 
-	app.get("/", (req, res) => {
+	app.get("/", async (req, res) => {
 		res.clearCookie("token");
-		return res.status(200).render("homepage");
+		const response = await fetchBlogs(req);
+		return res.status(200).render("homepage", {
+			total: response.total,
+			totalPages: response.totalPages,
+			currentPage: response.currentPage,
+			blogs: response.blogs,
+		});
 	});
 	
-	app.use((req, res) => res.status(404).render("notFound"));
+	app.use((req, res) => res.status(404).render("404"));
 
 	return app;
 };
